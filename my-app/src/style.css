@@ -1,0 +1,240 @@
+*, *::before, *::after {
+  box-sizing: border-box;
+}
+body {
+    font-family: Arial, Helvetica, sans-serif;
+    margin: 0;
+}
+
+header {
+    background-color: #deec7b;
+    color: rgb(11, 15, 7);
+    padding: 10px;
+    text-align: center;
+    
+}
+
+#main-container
+{
+    display:flex;
+    gap:30px;
+    margin: 1% 1% 0;
+    flex-direction: row;
+}
+
+/* FORM */
+
+#reg-form-main
+{
+    width:35%;
+    background:white;
+    padding:20px;
+    border-radius:8px;
+    box-shadow:0 2px 6px rgba(0,0,0,0.1);
+    margin-left: 5px;
+}
+#registration-form {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+}
+h2{
+    margin-top: 0; 
+}
+
+
+label
+{
+    display:block;
+    margin-bottom:5px;
+    
+}
+.input-fields {
+  padding: 10px;
+  border-radius: 6px;
+  border: 1px solid #ccc;
+}
+
+.input-fields:focus {
+  border-color: blue;
+  outline: none;
+}
+
+button
+{
+    padding:10px 25px;
+    border:none;
+    background:#007bff;
+    color:white;
+    border-radius:4px;
+    cursor:pointer;
+    margin-top: 10px;
+    display:inline-block ;
+}
+
+button:hover
+{
+    background:#0056b3;
+}
+.form-group{
+    display: flex;
+    flex-direction: row;
+    gap: 10px;
+}
+
+#search-input {
+   width: 100%;
+   min-height: 30px;
+   padding: 8px;
+   border: 1px solid #ccc;
+   border-radius: 4px;
+   margin-bottom: 10px;
+}
+
+/* TABLE */
+
+#reg-table
+{
+    width:65%;
+    background:white;
+    padding:20px;
+    border-radius:8px;
+    box-shadow:0 2px 6px rgba(0,0,0,0.1);
+}
+.table-container {
+    max-height: 280px;
+    overflow-y: auto;
+    overflow-x: hidden;
+    border: 1px solid #ccc;
+    border-radius: 10px;
+}
+table
+{
+    width:100%;
+    border-collapse:collapse;
+    table-layout: auto;
+   
+}
+
+th, td
+{
+    border:1px solid #ddd;
+    padding:8px;
+    position: sticky;
+    top: 0;
+    white-space: nowrap; 
+}
+
+th
+{ 
+    z-index: 2; 
+    text-align: left;
+    background: white;  
+    color: black;
+    font-weight: bold;
+    font-family: Arial, Helvetica, sans-serif;
+    font-size: medium;
+    padding: 20px;
+}
+.sort-container {
+  display: inline-flex;
+  flex-direction: column;
+  margin: 0;
+  padding: 0;
+}
+
+.sort-icon {
+  cursor: pointer;
+  margin-left: 4px;
+  color: #999;
+}
+
+.sort-icon:hover {
+  color: #000;
+}
+
+.active-sort {
+  color: #1e0ce8;
+  font-weight: bold;
+}
+.editing-row
+{
+    background:#fff3cd;
+}
+.action-column{
+    text-align: center;
+}
+.action-button
+{
+    padding:6px 10px;
+    border:none;
+    border-radius:4px;
+    cursor:pointer;
+    display: inline-block;
+    margin-right: 5px;
+}
+
+.edit-button
+{
+    background:#28a745;
+    color:white;
+}
+
+.delete-button
+{
+    background:#dc3545;
+    color:white;
+}
+
+
+/* For Mobiles or iPads */
+@media screen and ( max-width:900px ) {
+
+
+header {
+    text-align: left;
+}
+
+#main-container
+{
+    display:block;
+    margin: 10px;
+}
+
+/* FORM */
+
+#reg-form-main
+{
+    width:96%;
+    background:white;
+    padding: 5px 5px 10px;
+    margin: 0px 10px 10px;
+    
+}
+
+form{
+    margin-left: 5px;
+}
+
+.form-group label{
+ display:inline;
+
+}
+
+/* TABLE */
+
+#reg-table
+{
+    width:96%;
+    padding:5px;
+    margin: 10px;
+
+}
+
+table
+{
+    width:98%;
+    margin: 5px;
+}
+    
+}
