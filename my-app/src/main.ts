@@ -82,17 +82,6 @@ function isDuplicate(email: string): boolean {
   return users.some((user) => user.email === email);
 }
 
-/*function isDuplicate(email:string):boolean {
-    let rows = tableBody.rows;
-
-    for (let i = 0; i < rows.length; i++) {
-        if (rows[i].cells[1].innerText == email) {
-            return true;
-        }
-    }
-    return false;
-}*/
-
 // ADD ROW
 function addUser(): void {
   const user: User = {
@@ -106,23 +95,6 @@ function addUser(): void {
 
   renderTable(users);
 }
-
-/*function addRow() {
-    let row = tableBody.insertRow();
-    row.innerHTML =
-        "<td>" + nameInput.value + "</td>" +
-        "<td>" + emailInput.value + "</td>" +
-        "<td>" + phoneInput.value + "</td>" +
-        "<td>" + getGender() + "</td>" +
-        "<td>" +
-        "<button class='action-button edit-button' onclick='editData(this)' title='Edit'>" +
-                "<i class='fa-solid fa-pen'></i>" +
-            "</button>" +
-            "<button class='action-button delete-button' onclick='deleteData(this)' title='Delete'>" +
-                "<i class='fa-solid fa-trash'></i>" +
-            "</button>" +
-        "</td>";
-}*/
 
 // EDIT
 function editData(index: number): void {
@@ -144,28 +116,6 @@ function editData(index: number): void {
   renderTable(users);
 }
 
-/*function editData(btn: HTMLButtonElement): void {
-  //To remove highlighting
-   if (editRow) {
-    editRow.classList.remove("editing-row");
-  }
-    const row = btn.closest("tr") as HTMLTableRowElement;
-    editRow = row;
-   
-    //To add Class to edit row
-    editRow.classList.add("editing-row");
-    nameInput.value = row.cells[0].innerText;
-    emailInput.value = row.cells[1].innerText;
-    phoneInput.value = row.cells[2].innerText;
-
-    let gender = row.cells[3].innerText;
-    const radios = document.getElementsByName("gender") as NodeListOf<HTMLInputElement>;
-
-    for (let i = 0; i < radios.length; i++) {
-        radios[i].checked = (radios[i].value === gender);
-    }
-}*/
-
 // UPDATE
 function updateUser(): void {
   if (editRow === null) return;
@@ -181,21 +131,6 @@ function updateUser(): void {
 
   renderTable(users);
 }
-/*function updateRow():void {
-  if (!editRow) return;
-    editRow.cells[0].innerText = nameInput.value;
-    editRow.cells[1].innerText = emailInput.value;
-    editRow.cells[2].innerText = phoneInput.value;
-    editRow.cells[3].innerText = getGender();
-
-    //To remove highlighting
-   if (editRow) {
-    editRow.classList.remove("editing-row");
-  }
-    editRow = null;
-   
-    
-}*/
 
 // DELETE
 function deleteData(index: number): void {
@@ -205,15 +140,6 @@ function deleteData(index: number): void {
     renderTable(users);
   }
 }
-
-/*function deleteData(btn:HTMLButtonElement):void {
-    const row = btn.closest("tr") as HTMLTableRowElement;
-
-    if (confirm("Delete record?")) {
-        row.remove();
-        saveData();
-    }
-}*/
 
 // CLEAR
 function clearForm():void {
