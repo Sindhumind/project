@@ -1,5 +1,3 @@
-import "./style.css";
-
 import { Form } from "./components/form";
 import { Table } from "./components/table";
 document.querySelector<HTMLDivElement>("#app")!.innerHTML = `
@@ -46,6 +44,14 @@ form?.addEventListener("submit", (e: SubmitEvent ) => {
         alert("Fill all fields");
         return;
     }
+
+    // Email format validation
+  const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+
+  if (!emailRegex.test(emailInput.value)) {
+    alert("Invalid email");
+    return;
+  }
 
     const gender = getGender();
     if (gender === "") {
