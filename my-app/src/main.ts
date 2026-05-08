@@ -1,3 +1,20 @@
+import "./style.css";
+
+import { Form } from "./components/form";
+import { Table } from "./components/table";
+document.querySelector<HTMLDivElement>("#app")!.innerHTML = `
+  <header>
+    <h1>Registration Page</h1>
+  </header>
+
+  <pre id="output"></pre>
+
+  <div id="main-container">
+    ${Form()}
+    ${Table()}
+  </div>
+`;
+
 // TYPES
 type User = {
       name: string;
@@ -12,8 +29,8 @@ const nameInput = document.getElementById("full-name") as HTMLInputElement;
 const emailInput = document.getElementById("email-address") as HTMLInputElement;
 const phoneInput = document.getElementById("phone-number") as HTMLInputElement;
 const tableBody = document.getElementById("table-body") as HTMLTableSectionElement;
-
-let editRow: HTMLTableRowElement | null = null;
+let users: User[] = [];
+let editRow: number | null = null;
 const searchInput = document.getElementById("search-input") as HTMLInputElement;
 
 //to load data once page loaded
@@ -30,7 +47,7 @@ form?.addEventListener("submit", (e: SubmitEvent ) => {
         return;
     }
 
-    let gender = getGender();
+    const gender = getGender();
     if (gender === "") {
         alert("Select gender");
         return;
@@ -41,13 +58,11 @@ form?.addEventListener("submit", (e: SubmitEvent ) => {
         return;
     }
 
-    if (editRow == null) {
-        addRow();
+    if (editRow === null) {
+        addUser();
     } else {
-        updateRow();
+        updateUser();
     }
-
-    saveData();
     clearForm();
 });
 
@@ -63,7 +78,11 @@ function getGender():string {
 }
 
 // DUPLICATE CHECK
-function isDuplicate(email:string):boolean {
+function isDuplicate(email: string): boolean {
+  return users.some((user) => user.email === email);
+}
+
+/*function isDuplicate(email:string):boolean {
     let rows = tableBody.rows;
 
     for (let i = 0; i < rows.length; i++) {
@@ -72,10 +91,23 @@ function isDuplicate(email:string):boolean {
         }
     }
     return false;
-}
+}*/
 
 // ADD ROW
-function addRow() {
+function addUser(): void {
+  const user: User = {
+    name: nameInput.value,
+    email: emailInput.value,
+    phone: phoneInput.value,
+    gender: getGender()
+  };
+
+  users.push(user);
+
+  renderTable(users);
+}
+
+/*function addRow() {
     let row = tableBody.insertRow();
     row.innerHTML =
         "<td>" + nameInput.value + "</td>" +
@@ -90,10 +122,29 @@ function addRow() {
                 "<i class='fa-solid fa-trash'></i>" +
             "</button>" +
         "</td>";
-}
+}*/
 
 // EDIT
-function editData(btn: HTMLButtonElement): void {
+function editData(index: number): void {
+  const user = users[index];
+  
+  editRow = index;
+ 
+  nameInput.value = user.name;
+  emailInput.value = user.email;
+  phoneInput.value = user.phone;
+
+  const radios = document.getElementsByName(
+    "gender"
+  ) as NodeListOf<HTMLInputElement>;
+
+  radios.forEach((radio) => {
+    radio.checked = radio.value === user.gender;
+  });
+  renderTable(users);
+}
+
+/*function editData(btn: HTMLButtonElement): void {
   //To remove highlighting
    if (editRow) {
     editRow.classList.remove("editing-row");
@@ -113,10 +164,24 @@ function editData(btn: HTMLButtonElement): void {
     for (let i = 0; i < radios.length; i++) {
         radios[i].checked = (radios[i].value === gender);
     }
-}
+}*/
 
 // UPDATE
-function updateRow():void {
+function updateUser(): void {
+  if (editRow === null) return;
+
+  users[editRow] = {
+    name: nameInput.value,
+    email: emailInput.value,
+    phone: phoneInput.value,
+    gender: getGender()
+  };
+
+  editRow = null;
+
+  renderTable(users);
+}
+/*function updateRow():void {
   if (!editRow) return;
     editRow.cells[0].innerText = nameInput.value;
     editRow.cells[1].innerText = emailInput.value;
@@ -130,20 +195,28 @@ function updateRow():void {
     editRow = null;
    
     
-}
+}*/
 
 // DELETE
-function deleteData(btn:HTMLButtonElement):void {
+function deleteData(index: number): void {
+  if (confirm("Delete record?")) {
+    users.splice(index, 1);
+
+    renderTable(users);
+  }
+}
+
+/*function deleteData(btn:HTMLButtonElement):void {
     const row = btn.closest("tr") as HTMLTableRowElement;
 
     if (confirm("Delete record?")) {
         row.remove();
         saveData();
     }
-}
+}*/
 
 // CLEAR
-function clearForm() {
+function clearForm():void {
     nameInput.value = "";
     emailInput.value = "";
     phoneInput.value = "";
@@ -154,46 +227,48 @@ function clearForm() {
     }
 }
 
-
-// LOCAL STORAGE
-
-function saveData() {
-  const rows = tableBody.rows;
-  const data: User[] = [];
-
-  for (let i = 0; i < rows.length; i++) {
-    const cells = rows[i].cells;
-
-    const rowData = {
-      name: cells[0].innerText,
-      email: cells[1].innerText,
-      phone: cells[2].innerText,
-      gender: cells[3].innerText
-    };
-
-    data.push(rowData);
-  }
-
-  localStorage.setItem("users", JSON.stringify(data));
+// SAVE DATA
+function saveData(): void {
+  localStorage.setItem("users", JSON.stringify(users));
 }
 
-function loadData() {
-  const data: User[] = JSON.parse(localStorage.getItem("users") || "[]");
+// LOCAL STORAGE
+function loadData(): void {
+  users = JSON.parse(localStorage.getItem("users") || "[]");
+
+  renderTable(users);
+}
+
+
+function renderTable(data: User[]): void {
 
   tableBody.innerHTML = "";
 
-  for (let i = 0; i < data.length; i++) {
+  data.forEach((user, index) => {
+
+    const isEditing = editRow === index;
+
     const row = `
-      <tr>
-        <td>${data[i].name}</td>
-        <td>${data[i].email}</td>
-        <td>${data[i].phone}</td>
-        <td>${data[i].gender}</td>
+      <tr class="${isEditing ? 'editing-row' : ''}">
+        <td>${user.name}</td>
+        <td>${user.email}</td>
+        <td>${user.phone}</td>
+        <td>${user.gender}</td>
+
         <td>
-          <button class="action-button edit-button" onclick="editData(this)" title="Edit">
+          <button
+            class="action-button edit-button"
+            onclick="editData(${index})"
+            title="Edit"
+          >
             <i class="fa-solid fa-pen"></i>
           </button>
-          <button class="action-button delete-button" onclick="deleteData(this)" title="Delete">
+
+          <button
+            class="action-button delete-button"
+            onclick="deleteData(${index})"
+            title="Delete"
+          >
             <i class="fa-solid fa-trash"></i>
           </button>
         </td>
@@ -201,7 +276,9 @@ function loadData() {
     `;
 
     tableBody.innerHTML += row;
-  }
+  });
+
+  saveData();
 }
 
 //SEARCH 
@@ -211,54 +288,47 @@ searchInput.addEventListener("input", () => {
   // Get input value
   const value = searchInput.value.toLowerCase();
 
-  // Get all rows
-  const rows = tableBody.rows;
+  const filteredUsers = users.filter((user) => {
+    return (
+      user.name.toLowerCase().includes(value) ||
+      user.email.toLowerCase().includes(value) ||
+      user.phone.toLowerCase().includes(value) ||
+      user.gender.toLowerCase().includes(value)
+    );
+  });
 
-  // Loop through rows
-  for (let i = 0; i < rows.length; i++) {
-
-    const rowText = rows[i].innerText.toLowerCase();
-
-    // Check match
-    if (rowText.includes(value)) {
-      rows[i].style.display = "";      // show
-    } else {
-      rows[i].style.display = "none";  // hide
-    }
-  }
-
+  renderTable(filteredUsers);
 });
 
 
 // SORTING
 
 function sortTable(colIndex: number, order: "asc" | "desc"): void {
-    let rows = tableBody.rows;
-    let switching = true;
+    const fields: (keyof User)[] = [
+    "name",
+    "email",
+    "phone",
+    "gender"
+  ];
 
-    while (switching) {
-        switching = false;
+      const field = fields[colIndex];
 
-        for (let i = 0; i < rows.length - 1; i++) {
-            let x = rows[i].cells[colIndex].innerText.toLowerCase();
-            let y = rows[i + 1].cells[colIndex].innerText.toLowerCase();
+  users.sort((a, b) => {
 
-            let shouldSwitch = false;
+    const x = a[field].toLowerCase();
+    const y = b[field].toLowerCase();
 
-            if (order === "asc") {
-                if (x > y) shouldSwitch = true;
-            } else {
-                if (x < y) shouldSwitch = true;
-            }
-
-            if (shouldSwitch) {
-                rows[i].parentElement?.insertBefore(rows[i + 1], rows[i]);
-                switching = true;
-                break;
-            }
-        }
+    if (order === "asc") {
+      return x.localeCompare(y);
     }
+
+    return y.localeCompare(x);
+  });
+
+  renderTable(users);
 }
+
+
 //To make functions global
 (window as any).editData = editData;
 (window as any).deleteData = deleteData;
