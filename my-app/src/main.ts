@@ -1,11 +1,23 @@
 import { Form } from "./components/form";
 import { Table } from "./components/table";
+
+import { loadUsers, saveUsers } from "./services/storage";
+
+import { isValidEmail } from "./utils/validation";
+import { getGender } from "./utils/gender";
+import { isDuplicate } from "./utils/duplicate";
+
+import { filterUsers } from "./components/search";
+import { sortUsers } from "./components/sort";
+
+import type { User } from "./types/user";
+
+// APP UI
+
 document.querySelector<HTMLDivElement>("#app")!.innerHTML = `
   <header>
     <h1>Registration Page</h1>
   </header>
-
-  <pre id="output"></pre>
 
   <div id="main-container">
     ${Form()}
@@ -13,82 +25,84 @@ document.querySelector<HTMLDivElement>("#app")!.innerHTML = `
   </div>
 `;
 
-// TYPES
-type User = {
-      name: string;
-      email: string;
-      phone: string;
-      gender: string;
-    };
-
 // ELEMENTS
-const form = document.getElementById("registration-form") as HTMLFormElement;
-const nameInput = document.getElementById("full-name") as HTMLInputElement;
-const emailInput = document.getElementById("email-address") as HTMLInputElement;
-const phoneInput = document.getElementById("phone-number") as HTMLInputElement;
-const tableBody = document.getElementById("table-body") as HTMLTableSectionElement;
-let users: User[] = [];
-let editRow: number | null = null;
-const searchInput = document.getElementById("search-input") as HTMLInputElement;
 
-//to load data once page loaded
-window.onload = function () {
-    loadData();
-};
+const form = document.getElementById(
+  "registration-form"
+) as HTMLFormElement;
+
+const nameInput = document.getElementById(
+  "full-name"
+) as HTMLInputElement;
+
+const emailInput = document.getElementById(
+  "email-address"
+) as HTMLInputElement;
+
+const phoneInput = document.getElementById(
+  "phone-number"
+) as HTMLInputElement;
+
+const tableBody = document.getElementById(
+  "table-body"
+) as HTMLTableSectionElement;
+
+const searchInput = document.getElementById(
+  "search-input"
+) as HTMLInputElement;
+
+// STATE
+
+let users: User[] = loadUsers();
+
+let editRow: number | null = null;
+
+// INITIAL LOAD
+
+renderTable(users);
 
 // FORM SUBMIT
-form?.addEventListener("submit", (e: SubmitEvent ) => {
-    e.preventDefault();
 
-    if (nameInput.value == "" || emailInput.value == "" || phoneInput.value == "") {
-        alert("Fill all fields");
-        return;
-    }
+form.addEventListener("submit", (e: SubmitEvent) => {
+  e.preventDefault();
 
-    // Email format validation
-  const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+  if (
+    nameInput.value === "" ||
+    emailInput.value === "" ||
+    phoneInput.value === ""
+  ) {
+    alert("Fill all fields");
+    return;
+  }
 
-  if (!emailRegex.test(emailInput.value)) {
+  if (!isValidEmail(emailInput.value)) {
     alert("Invalid email");
     return;
   }
 
-    const gender = getGender();
-    if (gender === "") {
-        alert("Select gender");
-        return;
-    }
+  const gender = getGender();
 
-    if (editRow == null && isDuplicate(emailInput.value)) {
-        alert("Email exists");
-        return;
-    }
+  if (gender === "") {
+    alert("Select gender");
+    return;
+  }
 
-    if (editRow === null) {
-        addUser();
-    } else {
-        updateUser();
-    }
-    clearForm();
+  if (editRow === null && isDuplicate(users, emailInput.value)) {
+    alert("Email already exists");
+    return;
+  }
+
+  if (editRow === null) {
+    addUser();
+  } else {
+    updateUser();
+  }
+
+  clearForm();
 });
 
-// GET GENDER
-function getGender():string {
-   const radios = document.getElementsByName("gender") as NodeListOf<HTMLInputElement>;
-    for (let i = 0; i < radios.length; i++) {
-        if (radios[i].checked) {
-            return radios[i].value;
-        }
-    }
-    return "";
-}
+// ADD USER
 
-// DUPLICATE CHECK
-function isDuplicate(email: string): boolean {
-  return users.some((user) => user.email === email);
-}
-
-// ADD ROW
 function addUser(): void {
   const user: User = {
     name: nameInput.value,
@@ -102,12 +116,13 @@ function addUser(): void {
   renderTable(users);
 }
 
-// EDIT
+// EDIT USER
+
 function editData(index: number): void {
   const user = users[index];
-  
+
   editRow = index;
- 
+
   nameInput.value = user.name;
   emailInput.value = user.email;
   phoneInput.value = user.phone;
@@ -119,10 +134,13 @@ function editData(index: number): void {
   radios.forEach((radio) => {
     radio.checked = radio.value === user.gender;
   });
+
+  // Re-render table to apply editing-row class
   renderTable(users);
 }
 
-// UPDATE
+// UPDATE USER
+
 function updateUser(): void {
   if (editRow === null) return;
 
@@ -138,42 +156,46 @@ function updateUser(): void {
   renderTable(users);
 }
 
-// DELETE
+// DELETE USER
+
 function deleteData(index: number): void {
   if (confirm("Delete record?")) {
+
     users.splice(index, 1);
+
+    // Reset edit row if deleted row was editing
+    if (editRow === index) {
+      editRow = null;
+    }
+
+    // Adjust edit row index after delete
+    else if (editRow !== null && editRow > index) {
+      editRow--;
+    }
 
     renderTable(users);
   }
 }
 
-// CLEAR
-function clearForm():void {
-    nameInput.value = "";
-    emailInput.value = "";
-    phoneInput.value = "";
+// CLEAR FORM
 
-    const radios = document.getElementsByName("gender") as NodeListOf<HTMLInputElement>;
-    for (let i = 0; i < radios.length; i++) {
-        radios[i].checked = false;
-    }
+function clearForm(): void {
+  nameInput.value = "";
+  emailInput.value = "";
+  phoneInput.value = "";
+
+  const radios = document.getElementsByName(
+    "gender"
+  ) as NodeListOf<HTMLInputElement>;
+
+  radios.forEach((radio) => {
+    radio.checked = false;
+  });
 }
 
-// SAVE DATA
-function saveData(): void {
-  localStorage.setItem("users", JSON.stringify(users));
-}
-
-// LOCAL STORAGE
-function loadData(): void {
-  users = JSON.parse(localStorage.getItem("users") || "[]");
-
-  renderTable(users);
-}
-
+// RENDER TABLE
 
 function renderTable(data: User[]): void {
-
   tableBody.innerHTML = "";
 
   data.forEach((user, index) => {
@@ -181,7 +203,7 @@ function renderTable(data: User[]): void {
     const isEditing = editRow === index;
 
     const row = `
-      <tr class="${isEditing ? 'editing-row' : ''}">
+      <tr class="${isEditing ? "editing-row" : ""}">
         <td>${user.name}</td>
         <td>${user.email}</td>
         <td>${user.phone}</td>
@@ -210,58 +232,34 @@ function renderTable(data: User[]): void {
     tableBody.innerHTML += row;
   });
 
-  saveData();
+  saveUsers(users);
 }
 
-//SEARCH 
+// SEARCH
 
 searchInput.addEventListener("input", () => {
 
-  // Get input value
   const value = searchInput.value.toLowerCase();
 
-  const filteredUsers = users.filter((user) => {
-    return (
-      user.name.toLowerCase().includes(value) ||
-      user.email.toLowerCase().includes(value) ||
-      user.phone.toLowerCase().includes(value) ||
-      user.gender.toLowerCase().includes(value)
-    );
-  });
+  const filteredUsers = filterUsers(users, value);
 
   renderTable(filteredUsers);
 });
 
-
 // SORTING
 
-function sortTable(colIndex: number, order: "asc" | "desc"): void {
-    const fields: (keyof User)[] = [
-    "name",
-    "email",
-    "phone",
-    "gender"
-  ];
+function sortTable(
+  colIndex: number,
+  order: "asc" | "desc"
+): void {
 
-      const field = fields[colIndex];
-
-  users.sort((a, b) => {
-
-    const x = a[field].toLowerCase();
-    const y = b[field].toLowerCase();
-
-    if (order === "asc") {
-      return x.localeCompare(y);
-    }
-
-    return y.localeCompare(x);
-  });
+  users = sortUsers(users, colIndex, order);
 
   renderTable(users);
 }
 
+// GLOBAL FUNCTIONS
 
-//To make functions global
 (window as any).editData = editData;
 (window as any).deleteData = deleteData;
 (window as any).sortTable = sortTable;
