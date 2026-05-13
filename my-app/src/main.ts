@@ -2,6 +2,7 @@ import { Form } from "./components/form";
 import { Table } from "./components/table";
 
 import { loadUsers, saveUsers } from "./services/storage";
+import { renderTable } from "./components/renderTable";
 
 import { isValidEmail } from "./utils/validation";
 import { getGender } from "./utils/gender";
@@ -27,42 +28,26 @@ document.querySelector<HTMLDivElement>("#app")!.innerHTML = `
 
 // ELEMENTS
 
-const form = document.getElementById(
-  "registration-form"
-) as HTMLFormElement;
+const form = document.getElementById("registration-form") as HTMLFormElement;
 
-const nameInput = document.getElementById(
-  "full-name"
-) as HTMLInputElement;
+const nameInput = document.getElementById("full-name") as HTMLInputElement;
 
-const emailInput = document.getElementById(
-  "email-address"
-) as HTMLInputElement;
+const emailInput = document.getElementById("email-address") as HTMLInputElement;
 
-const phoneInput = document.getElementById(
-  "phone-number"
-) as HTMLInputElement;
+const phoneInput = document.getElementById("phone-number") as HTMLInputElement;
 
-const tableBody = document.getElementById(
-  "table-body"
-) as HTMLTableSectionElement;
+const tableBody = document.getElementById("table-body") as HTMLTableSectionElement;
 
-const searchInput = document.getElementById(
-  "search-input"
-) as HTMLInputElement;
+const searchInput = document.getElementById("search-input") as HTMLInputElement;
 
 // STATE
-
 let users: User[] = loadUsers();
-
 let editRow: number | null = null;
 
 // INITIAL LOAD
-
-renderTable(users);
+ renderTable(users, tableBody, editRow);
 
 // FORM SUBMIT
-
 form.addEventListener("submit", (e: SubmitEvent) => {
   e.preventDefault();
 
@@ -113,7 +98,9 @@ function addUser(): void {
 
   users.push(user);
 
-  renderTable(users);
+  saveUsers(users);
+
+  renderTable(users, tableBody, editRow);
 }
 
 // EDIT USER
@@ -136,7 +123,7 @@ function editData(index: number): void {
   });
 
   // Re-render table to apply editing-row class
-  renderTable(users);
+  renderTable(users, tableBody, editRow);
 }
 
 // UPDATE USER
@@ -153,7 +140,9 @@ function updateUser(): void {
 
   editRow = null;
 
-  renderTable(users);
+  saveUsers(users);
+
+  renderTable(users, tableBody, editRow);
 }
 
 // DELETE USER
@@ -162,18 +151,21 @@ function deleteData(index: number): void {
   if (confirm("Delete record?")) {
 
     users.splice(index, 1);
-
     // Reset edit row if deleted row was editing
     if (editRow === index) {
-      editRow = null;
+    editRow = null;
+    clearForm();
     }
 
     // Adjust edit row index after delete
     else if (editRow !== null && editRow > index) {
       editRow--;
     }
+    
+    saveUsers(users);
 
-    renderTable(users);
+    renderTable(users, tableBody, editRow);
+   
   }
 }
 
@@ -193,48 +185,6 @@ function clearForm(): void {
   });
 }
 
-// RENDER TABLE
-
-function renderTable(data: User[]): void {
-  tableBody.innerHTML = "";
-
-  data.forEach((user, index) => {
-
-    const isEditing = editRow === index;
-
-    const row = `
-      <tr class="${isEditing ? "editing-row" : ""}">
-        <td>${user.name}</td>
-        <td>${user.email}</td>
-        <td>${user.phone}</td>
-        <td>${user.gender}</td>
-
-        <td>
-          <button
-            class="action-button edit-button"
-            onclick="editData(${index})"
-            title="Edit"
-          >
-            <i class="fa-solid fa-pen"></i>
-          </button>
-
-          <button
-            class="action-button delete-button"
-            onclick="deleteData(${index})"
-            title="Delete"
-          >
-            <i class="fa-solid fa-trash"></i>
-          </button>
-        </td>
-      </tr>
-    `;
-
-    tableBody.innerHTML += row;
-  });
-
-  saveUsers(users);
-}
-
 // SEARCH
 
 searchInput.addEventListener("input", () => {
@@ -243,19 +193,15 @@ searchInput.addEventListener("input", () => {
 
   const filteredUsers = filterUsers(users, value);
 
-  renderTable(filteredUsers);
+  renderTable(filteredUsers, tableBody, editRow);
 });
 
 // SORTING
 
-function sortTable(
-  colIndex: number,
-  order: "asc" | "desc"
-): void {
-
+function sortTable(colIndex: number, order: "asc" | "desc"): void {
   users = sortUsers(users, colIndex, order);
 
-  renderTable(users);
+renderTable(users, tableBody, editRow);
 }
 
 // GLOBAL FUNCTIONS

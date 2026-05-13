@@ -8,7 +8,7 @@
                 <input type="text" id="full-name" class = "input-fields">
                 
                 <label>Email</label>
-                <input type="email" id="email-address" class = "input-fields">
+                <input type="text" id="email-address" class = "input-fields">
               
                 <label>Phone</label>
                 <input type="phone" id="phone-number" pattern="[0-9+]+" required class = "input-fields">
