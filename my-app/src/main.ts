@@ -1,15 +1,17 @@
 import { Form } from "./components/form";
+import { initializeForm } from "./components/form";
+import { clearForm } from "./components/form";
+import { editData } from "./components/form";
 import { Table } from "./components/table";
+import { deleteData } from "./components/table";
+import { addUser } from "./components/table";
+import { updateUser } from "./components/table";
 
-import { loadUsers, saveUsers } from "./services/storage";
+import { loadUsers } from "./services/storage";
 import { renderTable } from "./components/renderTable";
 
-import { isValidEmail } from "./utils/validation";
-import { getGender } from "./utils/gender";
-import { isDuplicate } from "./utils/duplicate";
-
-import { filterUsers } from "./components/search";
-import { sortUsers } from "./components/sort";
+import { initializeSort } from "./utils/sort";
+import { initializeSearch } from "./utils/search";
 
 import type { User } from "./types/user";
 
@@ -45,167 +47,79 @@ let users: User[] = loadUsers();
 let editRow: number | null = null;
 
 // INITIAL LOAD
- renderTable(users, tableBody, editRow);
+ renderTable(users,users,tableBody,editRow);
+ initializeSort(users,tableBody,editRow);
+ initializeSearch(searchInput,users,tableBody,editRow);
+ initializeForm(
+  form,
+  nameInput,
+  emailInput,
+  phoneInput,
+  users,
+  () => editRow,
 
-// FORM SUBMIT
-form.addEventListener("submit", (e: SubmitEvent) => {
-  e.preventDefault();
+  () =>
+    addUser(
+      users,
+      nameInput,
+      emailInput,
+      phoneInput,
+      tableBody,
+      () => editRow
+    ),
 
-  if (
-    nameInput.value === "" ||
-    emailInput.value === "" ||
-    phoneInput.value === ""
-  ) {
-    alert("Fill all fields");
-    return;
-  }
+  () =>
+    updateUser(
+      users,
+      nameInput,
+      emailInput,
+      phoneInput,
+      tableBody,
+      () => editRow,
+      (value) => {
+        editRow = value;
+      }
+    ),
 
-  if (!isValidEmail(emailInput.value)) {
-    alert("Invalid email");
-    return;
-  }
+  () =>
+    clearForm(
+      nameInput,
+      emailInput,
+      phoneInput
+    )
+);
 
-  const gender = getGender();
-
-  if (gender === "") {
-    alert("Select gender");
-    return;
-  }
-
-  if (editRow === null && isDuplicate(users, emailInput.value)) {
-    alert("Email already exists");
-    return;
-  }
-
-  if (editRow === null) {
-    addUser();
-  } else {
-    updateUser();
-  }
-
-  clearForm();
-});
-
-// ADD USER
-
-function addUser(): void {
-  const user: User = {
-    name: nameInput.value,
-    email: emailInput.value,
-    phone: phoneInput.value,
-    gender: getGender()
-  };
-
-  users.push(user);
-
-  saveUsers(users);
-
-  renderTable(users, tableBody, editRow);
-}
-
-// EDIT USER
-
-function editData(index: number): void {
-  const user = users[index];
-
-  editRow = index;
-
-  nameInput.value = user.name;
-  emailInput.value = user.email;
-  phoneInput.value = user.phone;
-
-  const radios = document.getElementsByName(
-    "gender"
-  ) as NodeListOf<HTMLInputElement>;
-
-  radios.forEach((radio) => {
-    radio.checked = radio.value === user.gender;
-  });
-
-  // Re-render table to apply editing-row class
-  renderTable(users, tableBody, editRow);
-}
-
-// UPDATE USER
-
-function updateUser(): void {
-  if (editRow === null) return;
-
-  users[editRow] = {
-    name: nameInput.value,
-    email: emailInput.value,
-    phone: phoneInput.value,
-    gender: getGender()
-  };
-
-  editRow = null;
-
-  saveUsers(users);
-
-  renderTable(users, tableBody, editRow);
-}
-
-// DELETE USER
-
-function deleteData(index: number): void {
-  if (confirm("Delete record?")) {
-
-    users.splice(index, 1);
-    // Reset edit row if deleted row was editing
-    if (editRow === index) {
-    editRow = null;
-    clearForm();
-    }
-
-    // Adjust edit row index after delete
-    else if (editRow !== null && editRow > index) {
-      editRow--;
-    }
-    
-    saveUsers(users);
-
-    renderTable(users, tableBody, editRow);
-   
-  }
-}
-
-// CLEAR FORM
-
-function clearForm(): void {
-  nameInput.value = "";
-  emailInput.value = "";
-  phoneInput.value = "";
-
-  const radios = document.getElementsByName(
-    "gender"
-  ) as NodeListOf<HTMLInputElement>;
-
-  radios.forEach((radio) => {
-    radio.checked = false;
-  });
-}
-
-// SEARCH
-
-searchInput.addEventListener("input", () => {
-
-  const value = searchInput.value.toLowerCase();
-
-  const filteredUsers = filterUsers(users, value);
-
-  renderTable(filteredUsers, tableBody, editRow);
-});
-
-// SORTING
-
-function sortTable(colIndex: number, order: "asc" | "desc"): void {
-  users = sortUsers(users, colIndex, order);
-
-renderTable(users, tableBody, editRow);
-}
 
 // GLOBAL FUNCTIONS
 
-(window as any).editData = editData;
-(window as any).deleteData = deleteData;
-(window as any).sortTable = sortTable;
+(window as any).editData = (index: number) => {
+
+  editData(
+    index,
+    users,
+    (value) => {
+      editRow = value;
+    },
+    nameInput,
+    emailInput,
+    phoneInput,
+    tableBody,
+    () => editRow
+  );
+};
+(window as any).deleteData = (index: number) => {
+  deleteData(
+    index,
+    users,
+    () => editRow,
+    (value) => {
+      editRow = value;
+    },
+    () => clearForm(
+      nameInput,
+      emailInput,
+      phoneInput
+    ),
+    tableBody
+  );
+};

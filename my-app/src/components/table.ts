@@ -1,4 +1,9 @@
-  export function Table() {
+import type { User } from "../types/user";
+import { saveUsers } from "../services/storage";
+import { renderTable } from "./renderTable"; 
+import { getGender } from "../utils/gender";
+ 
+ export function Table() {
   return `
     <div id="reg-table">
         <h2>Registered Users</h2>
@@ -49,3 +54,101 @@
     </div>`;
 
   }
+  // DELETE USER
+ 
+export function deleteData(
+  index: number,
+  users: User[],
+  getEditRow: () => number | null,
+  setEditRow: (value: number | null) => void,
+  clearForm: () => void,
+  tableBody: HTMLTableSectionElement
+): void {
+
+  if (confirm("Delete record?")) {
+
+    users.splice(index, 1);
+
+    // Current edit row
+    const currentEditRow = getEditRow();
+
+    // Reset edit row if deleted row was editing
+    if (currentEditRow === index) {
+
+      setEditRow(null);
+
+      clearForm();
+    }
+
+    // Adjust edit row index after delete
+    else if (
+      currentEditRow !== null &&
+      currentEditRow > index
+    ) {
+
+      setEditRow(currentEditRow - 1);
+    }
+
+    saveUsers(users);
+
+    renderTable(
+      users,
+      users,
+      tableBody,
+      getEditRow()
+    );
+  }
+}
+
+// ADD USER
+
+export function addUser(
+  users: User[],
+  nameInput: HTMLInputElement,
+  emailInput: HTMLInputElement,
+  phoneInput: HTMLInputElement,
+  tableBody: HTMLTableSectionElement,
+  getEditRow: () => number | null
+): void {
+  const user: User = {
+    name: nameInput.value,
+    email: emailInput.value,
+    phone: phoneInput.value,
+    gender: getGender()
+  };
+
+  users.push(user);
+
+  saveUsers(users);
+
+  renderTable(users, users, tableBody, getEditRow());
+}
+
+
+// UPDATE USER
+
+export function updateUser(
+  users: User[],
+  nameInput: HTMLInputElement,
+  emailInput: HTMLInputElement,
+  phoneInput: HTMLInputElement,
+  tableBody: HTMLTableSectionElement,
+  getEditRow: () => number | null,
+  setEditRow: (value: number | null) => void
+): void {
+  const editRow = getEditRow();
+  if (editRow === null) return;
+
+  users[editRow] = {
+    name: nameInput.value,
+    email: emailInput.value,
+    phone: phoneInput.value,
+    gender: getGender()
+  };
+
+  setEditRow(null);
+
+  saveUsers(users);
+
+  renderTable(users, users, tableBody, getEditRow());
+}

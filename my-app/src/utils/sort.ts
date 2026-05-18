@@ -1,4 +1,5 @@
 import type { User } from "../types/user";
+import { renderTable } from "../components/renderTable";
 
 export function sortUsers(
   users: User[],
@@ -24,4 +25,15 @@ export function sortUsers(
 
     return y.localeCompare(x);
   });
+}
+// SORTING
+ export function initializeSort(
+  users: User[],
+  tableBody: HTMLTableSectionElement,
+  editRow: number | null
+): void {
+  (window as any).sortTable = (colIndex: number, order: "asc" | "desc"): void => {
+    users = sortUsers(users, colIndex, order);
+    renderTable(users, users, tableBody, editRow);
+  };
 }
