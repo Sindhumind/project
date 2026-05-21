@@ -1,10 +1,11 @@
-import type { User } from "./types";
+import type { AppTypes } from "./types";
+type User = AppTypes["User"];
 
-export function validateEmail(email: string): boolean {
+function validateEmail(email: string): boolean {
   return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email);
 }
 
-export function isDuplicate(
+function isDuplicate(
   users: User[],
   email: string,
   editId: number | null
@@ -16,12 +17,11 @@ export function isDuplicate(
   );
 }
 
-export function filterUsers(
+function filterUsers(
   users: User[],
   search: string
 ): User[] {
   const value = search.toLowerCase();
-
   return users.filter((user) =>
     Object.values(user)
       .join(" ")
@@ -30,7 +30,7 @@ export function filterUsers(
   );
 }
 
-export function sortUsers(
+function sortUsers(
   users: User[],
   field: keyof User,
   order: "asc" | "desc"
@@ -38,9 +38,10 @@ export function sortUsers(
   return [...users].sort((a, b) => {
     const x = String(a[field]).toLowerCase();
     const y = String(b[field]).toLowerCase();
-
     return order === "asc"
       ? x.localeCompare(y)
       : y.localeCompare(x);
   });
 }
+
+export const logic = { validateEmail, isDuplicate, filterUsers, sortUsers };

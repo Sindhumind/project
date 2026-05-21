@@ -1,9 +1,10 @@
 import { state } from "../app.state";
 import { renderApp } from "./app";
-import { filterUsers,sortUsers,} from "../app.logic";
-import { saveUsers } from "../app.storage";
+import { storage } from "../app.storage";
+import { logic } from "../app.logic"; 
 import { createElement } from "../utils/dom";
-import type { User } from "../types";
+import type { AppTypes } from "../types";
+type User = AppTypes["User"];
 
 export function Table(): HTMLDivElement {
   const wrapper = createElement("div", "card");
@@ -133,13 +134,13 @@ headers.forEach((field) => {
 
   // TABLE BODY
   const tbody = createElement( "tbody" );
-  let users = filterUsers(
+  let users = logic.filterUsers(
     state.users,
     state.search
   );
 
   if (state.sortField) {
-    users = sortUsers(
+    users = logic.sortUsers(
       users,
       state.sortField,
       state.sortOrder
@@ -267,7 +268,7 @@ editBtn.addEventListener(
         };
       }
 
-      saveUsers();
+      storage.saveUsers();
       renderApp();
     }
   );

@@ -1,7 +1,7 @@
 import { state } from "../app.state";
 import { renderApp } from "./app";
-import { saveUsers } from "../app.storage";
-import { validateEmail, isDuplicate } from "../app.logic";
+import { storage } from "../app.storage";
+import { logic } from "../app.logic";  
 import { createElement } from "../utils/dom";
 
 export function Form(): HTMLDivElement {
@@ -100,13 +100,13 @@ export function Form(): HTMLDivElement {
         return;
       }
 
-      if (!validateEmail(email)) {
+      if (!logic.validateEmail(email)) {
         alert("Invalid email");
         return;
       }
 
       if (
-        isDuplicate( state.users, email, state.form.editId )
+        logic.isDuplicate( state.users, email, state.form.editId )
       ) {
         alert("Duplicate email");
         return;
@@ -151,7 +151,7 @@ export function Form(): HTMLDivElement {
         editId: null,
       };
 
-      saveUsers();
+      storage.saveUsers();
       renderApp();
     }
   );

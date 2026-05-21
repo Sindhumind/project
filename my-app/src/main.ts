@@ -1,13 +1,5 @@
 import "./style.css";
-
-import { loadUsers } from "./app.storage";
+import { storage } from "./app.storage";
 import { renderApp } from "./components/app";
 
-document.addEventListener(
-  "DOMContentLoaded",
-  (): void => {
-    loadUsers();
-
-    renderApp();
-  }
-);
+document.addEventListener( "DOMContentLoaded", (): void => { storage.loadUsers(); renderApp() } );
