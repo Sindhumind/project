@@ -34,11 +34,7 @@ export function Form(): HTMLDivElement {
   const genderWrapper = createElement("div", "radio-group");
   const genderTitle = createElement("p");
   genderTitle.textContent = "Gender";
-  const genders = [
-    "Male",
-    "Female",
-    "Other",
-  ];
+  const genders = ["Male","Female","Other"];
 
   genders.forEach((gender) => {
     const label = createElement("label","radio-label");
@@ -87,10 +83,7 @@ export function Form(): HTMLDivElement {
 
       // VALIDATION
       if (
-        !name ||
-        !email ||
-        !phone
-      ) {
+        !name || !email || !phone) {
         alert("Fill all fields");
         return;
       }

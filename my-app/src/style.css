@@ -171,7 +171,7 @@ label {
   );
 }
 
-.btn-danger {
+.btn-delete {
   background: var(
     --color-danger
   );

@@ -57,21 +57,19 @@ wrapper.appendChild(searchInput);
   // TABLE
   const table = createElement("table","table");
 
- // TABLE HEADER
+  // TABLE HEADER
 
-const thead = createElement("thead");
+  const thead = createElement("thead");
+  const headerRow = createElement("tr");
+  const headers: (keyof User)[] = [
+    "name",
+    "email",
+    "phone",
+    "gender",
+  ];
 
-const headerRow = createElement("tr");
-
-const headers: (keyof User)[] = [
-  "name",
-  "email",
-  "phone",
-  "gender",
-];
-
-headers.forEach((field) => {
-  const th = createElement("th");
+    headers.forEach((field) => {
+    const th = createElement("th");
 
   // HEADER CONTAINER
   const headerContent =
@@ -163,9 +161,7 @@ headers.forEach((field) => {
   return wrapper;
 }
 
-function createRow(
-  user: User
-): HTMLTableRowElement {
+function createRow(user: User): HTMLTableRowElement {
   const row = createElement("tr");
   if (state.form.editId === user.id) {
       row.classList.add("editing-row");
@@ -186,16 +182,13 @@ function createRow(
   // GENDER
   const gender = createElement("td");
   gender.textContent =
-    user.gender;
+  user.gender;
 
   // ACTIONS
   const actions = createElement("td");
 
   // EDIT BUTTON
-  const editBtn = createElement(
-    "button",
-    "btn"
-  );
+  const editBtn = createElement("button","btn");
   editBtn.type = "button";
   editBtn.title = "Edit";
 
@@ -224,19 +217,13 @@ editBtn.addEventListener(
 
   // DELETE BUTTON
 
-  const deleteBtn = createElement(
-    "button",
-    "btn btn-danger"
-  );
-
+  const deleteBtn = createElement("button","btn btn-delete");
   deleteBtn.type = "button";
   deleteBtn.title = "Delete";
   const deleteIcon = createElement("i");
 
   deleteIcon.className = "fa-solid fa-trash";
-
   deleteBtn.appendChild( deleteIcon );
-
   deleteBtn.addEventListener(
     "click",
     () => {
